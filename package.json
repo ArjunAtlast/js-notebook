@@ -2,20 +2,37 @@
   "name": "js-notebook",
   "version": "0.1.0",
   "private": true,
+  "productName": "JavaScript Notebook",
+  "main": "electron/main.js",
+  "homepage": "./",
   "dependencies": {
-    "@testing-library/jest-dom": "^5.11.8",
+    "@craco/craco": "^6.0.0",
+    "@tailwindcss/postcss7-compat": "^2.0.2",
+    "@testing-library/jest-dom": "^5.11.6",
     "@testing-library/react": "^11.2.2",
     "@testing-library/user-event": "^12.6.0",
+    "autoprefixer": "^9.8.6",
+    "postcss": "^7.0.35",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-icons": "^4.1.0",
     "react-scripts": "4.0.1",
+    "react-toastify": "^6.2.0",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.2",
     "web-vitals": "^0.2.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "set BROWSER=none && craco start",
+    "start-electron": "set ELECTRON_START_URL=http://localhost:3000 && electron .",
+    "build": "craco build",
+    "test": "craco test",
+    "eject": "react-scripts eject",
+    "build-electron": "robocopy electron build/electron /S",
+    "package": "electron-builder build --win -c.extraMetadata.main=build/electron/main.js --publish never"
+  },
+  "devDependencies": {
+    "electron": "^11.1.1",
+    "electron-builder": "^22.9.1"
   },
   "eslintConfig": {
     "extends": [
@@ -34,5 +51,20 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "build": {
+    "appId": "com.example.audio-recorder",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "icon": "build/icon.png"
+    },
+    "publish": {
+      "provider": "github",
+      "repo": "js-notebook",
+      "owner": "arjun"
+    }
   }
 }
