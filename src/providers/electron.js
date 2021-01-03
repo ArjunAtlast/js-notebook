@@ -19,45 +19,23 @@ class ElectronService {
         this.window.close()
     }
 
-    async selectSaveDir() {
-        const result = await electron.remote.dialog.showOpenDialog(null, {
-            title: "Select Save Folder",
-            properties: ['openDirectory'],
-        })
-        
-        if (!result.canceled) {
-            this.saveDir = result.filePaths[0]
-        }
-    }
-
     /**
-     * Save the list of audios.
-     * @param {Blob[]} blobs - The array of blobs
-     * @param {string} speaker - The name of speaker
+     * Execute the code
+     * @param {str} name - A unique name to identify the execution cell
+     * @param {str} code - The code to execute
      */
-    async saveSamples(blobs, speaker) {
-        await this.selectSaveDir()
-        return Promise.all(blobs.map((blob, i) => this.__sendBlob(blob, speaker, i)))
-    }
-
-    async __sendBlob(blob, speaker, index) {
-        console.log("saving", index)
+    async execute(name, code) {
+        
         return new Promise((resolve, reject) => {
-            this.ipc.once("file.saved", (_, path) => {
-                resolve(path)
-            })
-            this.ipc.once("file.error", (_, error) => {
-                reject(error)
-            })
-            // Read blob
-            let reader = new FileReader()
-            reader.onload = () => {
-                if (reader.readyState === 2) {
-                    const buffer = Buffer.from(reader.result)
-                    this.ipc.send("file.save", this.saveDir, speaker, index, buffer)
+            this.ipc.once(`execution/${name}`, (e, status, result, error) => {
+                if (status === 1) {
+                    resolve([result, error])
                 }
-            }
-            reader.readAsArrayBuffer(blob)
+                else {
+                    reject(error)
+                }
+            })
+            this.ipc.send("execution/request", name, code)
         })
     }
 

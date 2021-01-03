@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const url = require('url');
+const executor = require('./executor')
 let mainWindow;
 
 // create window
@@ -21,7 +22,9 @@ function createWindow() {
         },
     });
     mainWindow.loadURL(startUrl);
-    // mainWindow.webContents.openDevTools()
+    if (process.env.NODE_ENV !== 'production') {
+        mainWindow.webContents.openDevTools()
+    }
     mainWindow.on('closed', function () {
         mainWindow = null;
     });
@@ -42,11 +45,16 @@ app.on('activate', function () {
 /* -------------------------------------------------------------------------- */
 /*                                     IPC                                    */
 /* -------------------------------------------------------------------------- */
-// ipcMain.on("file.save", (e, directory, speaker, index, buffer) => {
-//     try {
-//         e.sender.send("file.success", "success")
-//     }
-//     catch (error) {
-//         e.sender.send("file.error", error)
-//     }
-// })
+ipcMain.on("execution/request", (e, name, code) => {
+    const SUCCESS = 1
+    const FAIL = 0
+    try {
+        const exec = executor()
+        console.log('Executing script ' + name)
+        const {results, error, counter} = exec.run(code, name)
+        e.sender.send(`execution/${name}`, SUCCESS, results, error)
+    }
+    catch (error) {
+        e.sender.send(`execution/${name}`, FAIL, null, error)
+    }
+})

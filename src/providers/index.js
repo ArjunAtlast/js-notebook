@@ -6,7 +6,6 @@ const ServiceContext = React.createContext(null)
 export const ServiceProvider = ({children}) => {
     
     const electron = useMemo(() => new ElectronService(), [])
-    const recorder = useMemo(() => new RecorderService(), [])
 
     const services = {
         electron
